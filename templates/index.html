@@ -46,6 +46,13 @@
             color: #357ABD;
             font-size: 24px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header h1 .emoji {
+            display: inline;
         }
 
         .header-stats {
@@ -251,6 +258,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            scroll-behavior: smooth;
         }
 
         .message {
@@ -391,6 +399,9 @@
             resize: none;
             min-height: 50px;
             max-height: 150px;
+            overflow-y: auto;
+            line-height: 1.5;
+            transition: border-color 0.3s;
         }
 
         .chat-input:focus {
@@ -419,6 +430,14 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .send-icon {
+            display: none;
+        }
+
+        .send-text {
+            display: inline;
         }
 
         .loading {
@@ -566,23 +585,30 @@
         .mobile-menu-btn {
             display: none;
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
+            top: 15px;
+            left: 15px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
             border: none;
-            border-radius: 50%;
+            border-radius: 12px;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-menu-btn:active {
             transform: scale(0.95);
+        }
+
+        .mobile-menu-btn.hidden {
+            display: none !important;
         }
 
         .sidebar-overlay {
@@ -599,37 +625,56 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 0;
+                background: #f5f7fa;
             }
 
             .container {
                 grid-template-columns: 1fr;
                 height: 100vh;
-                gap: 10px;
+                gap: 0;
+                max-width: 100%;
             }
 
             .header {
-                padding: 15px;
-                flex-direction: column;
-                gap: 15px;
+                padding: 12px 20px 12px 75px;
+                border-radius: 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                flex-direction: row;
+                gap: 10px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
             }
 
             .header h1 {
-                font-size: 18px;
+                font-size: 16px;
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .header h1 .emoji {
+                display: none;
             }
 
             .header-stats {
-                width: 100%;
-                justify-content: space-around;
-                gap: 10px;
+                display: flex;
+                gap: 12px;
+                flex-shrink: 0;
+            }
+
+            .stat {
+                min-width: 45px;
             }
 
             .stat-value {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             .stat-label {
-                font-size: 10px;
+                font-size: 9px;
             }
 
             .sidebar {
@@ -637,11 +682,12 @@
                 left: -100%;
                 top: 0;
                 width: 85%;
-                max-width: 350px;
+                max-width: 320px;
                 height: 100vh;
                 z-index: 1001;
                 transition: left 0.3s ease-out;
                 border-radius: 0;
+                box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
             }
 
             .sidebar.mobile-open {
@@ -654,43 +700,145 @@
 
             .mobile-menu-btn {
                 display: flex;
-                align-items: center;
-                justify-content: center;
             }
 
             .chat-area {
                 grid-column: 1;
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 70px);
+                margin: 0;
             }
 
             .chat-messages {
                 padding: 15px;
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .message {
-                max-width: 95%;
+                max-width: 90%;
+                margin-bottom: 12px;
+            }
+
+            .message-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .message-content {
+                padding: 12px;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .chat-input-area {
+                padding: 12px 15px 15px;
+                background: white;
+                border-top: 1px solid #e2e8f0;
+                box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .chat-controls {
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .switch {
+                width: 44px;
+                height: 22px;
+            }
+
+            .slider:before {
+                height: 16px;
+                width: 16px;
+            }
+
+            input:checked + .slider:before {
+                transform: translateX(22px);
+            }
+
+            .switch-label {
+                font-size: 12px;
+            }
+
+            .btn-small {
+                padding: 6px 12px;
+                font-size: 11px;
             }
 
             .chat-input-container {
-                flex-direction: column;
-                gap: 10px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                align-items: flex-end;
             }
 
             .chat-input {
-                min-height: 80px;
+                flex: 1;
+                min-height: 44px;
+                max-height: 100px;
+                padding: 12px;
+                font-size: 15px;
+                border-radius: 22px;
+                resize: none;
+                line-height: 1.4;
             }
 
             .send-btn {
-                width: 100%;
-                padding: 15px;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0;
+                border-radius: 50%;
+                font-size: 18px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .send-btn:hover {
+                transform: none;
+            }
+
+            .send-btn:active {
+                transform: scale(0.95);
+            }
+
+            .send-text {
+                display: none;
+            }
+
+            .send-icon {
+                display: inline;
+            }
+
+            .loading {
+                padding: 12px;
+            }
+
+            .spinner {
+                width: 32px;
+                height: 32px;
             }
 
             .upload-zone {
-                padding: 20px;
+                padding: 20px 15px;
+            }
+
+            .upload-icon {
+                font-size: 36px;
             }
 
             .context-file {
                 flex-direction: column;
                 gap: 10px;
+                padding: 12px;
             }
 
             .file-actions {
@@ -699,32 +847,70 @@
 
             .file-actions button {
                 width: 100%;
+                padding: 8px;
+            }
+
+            .empty-state {
+                padding: 30px 15px;
+            }
+
+            .empty-state-icon {
+                font-size: 36px;
             }
         }
 
         @media (max-width: 480px) {
+            .header {
+                padding: 10px 15px 10px 70px;
+            }
+
             .header h1 {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             .header-stats {
-                flex-wrap: wrap;
+                gap: 8px;
             }
 
             .stat {
-                flex: 0 0 45%;
+                min-width: 40px;
+            }
+
+            .stat-value {
+                font-size: 13px;
+            }
+
+            .stat-label {
+                font-size: 8px;
             }
 
             .sidebar {
                 width: 90%;
+                max-width: 280px;
             }
 
             .tabs {
-                flex-direction: column;
+                gap: 4px;
             }
 
             .tab {
-                width: 100%;
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .message-content {
+                font-size: 13px;
+            }
+
+            .chat-input {
+                font-size: 16px;
+                padding: 10px 14px;
+            }
+
+            .send-btn {
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
             }
         }
     </style>
@@ -733,7 +919,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🤖 Research Assistant - Context Chatbot</h1>
+            <h1><span class="emoji">🤖</span> Research Assistant</h1>
             <div class="header-stats">
                 <div class="stat">
                     <span class="stat-value" id="total-files">0</span>
@@ -863,9 +1049,11 @@
                         class="chat-input" 
                         id="user-input" 
                         placeholder="Write your question here..."
-                        onkeydown="handleKeyDown(event)"></textarea>
+                        onkeydown="handleKeyDown(event)"
+                        rows="1"></textarea>
                     <button class="send-btn" id="send-btn" onclick="sendMessage()">
-                        Send
+                        <span class="send-text">Send</span>
+                        <span class="send-icon">➤</span>
                     </button>
                 </div>
             </div>
@@ -912,6 +1100,13 @@
             fileInput.addEventListener('change', (e) => {
                 handleFiles(e.target.files);
                 fileInput.value = '';
+            });
+
+            // Auto-resize textarea
+            const chatInput = document.getElementById('user-input');
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
             });
         });
 
@@ -1174,6 +1369,8 @@
             // Add user message to chat
             addMessage('user', message);
             input.value = '';
+            input.style.height = 'auto';
+            input.rows = 1;
             
             // Show loading
             isProcessing = true;

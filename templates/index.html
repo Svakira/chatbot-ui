@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Assistant - Context Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1600px;
+            height: 90vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-zone:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+
+        .upload-zone.dragging {
+            background: #e8ebff;
+            border-color: #667eea;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .context-files {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .context-file {
+            background: #f8f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .context-file:hover {
+            background: #e8ebff;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .file-meta {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        .chat-area {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+        }
+
+        .message.assistant .message-avatar {
+            background: #764ba2;
+        }
+
+        .message-content {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            flex: 1;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .message.user .message-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8f9ff;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .switch-label {
+            margin-left: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            min-height: 50px;
+            max-height: 150px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .config-group {
+            margin-bottom: 20px;
+        }
+
+        .config-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stats-card {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stats-card-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stats-card-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .warning {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        textarea {
+            font-family: inherit;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🤖 Research Assistant - Context Chatbot</h1>
+            <div class="header-stats">
+                <div class="stat">
+                    <span class="stat-value" id="total-files">0</span>
+                    <span class="stat-label">Archivos</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="total-tokens">0K</span>
+                    <span class="stat-label">Tokens</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="total-turns">0</span>
+                    <span class="stat-label">Conversaciones</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">Panel de Control</div>
+            <div class="sidebar-content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('context')">📁 Contexto</button>
+                    <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+                    <button class="tab" onclick="switchTab('stats')">📊 Stats</button>
+                </div>
+
+                <!-- Context Tab -->
+                <div id="context-tab" class="tab-content active">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">📤</div>
+                        <div><strong>Click o arrastra archivos</strong></div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            .txt, .epub, .md, .json, .csv, .log
+                        </div>
+                        <input type="file" id="file-input" style="display: none;" multiple 
+                               accept=".txt,.epub,.md,.json,.csv,.log">
+                    </div>
+
+                    <div id="context-files" class="context-files">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <div>No hay archivos en el contexto</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-danger btn-small" onclick="clearContext()">
+                            🗑️ Limpiar Todo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Config Tab -->
+                <div id="config-tab" class="tab-content">
+                    <div class="config-group">
+                        <label class="config-label">Max Tokens</label>
+                        <input type="number" class="config-input" id="max-tokens" value="4000" min="100" max="8000">
+                    </div>
+
+                    <div class="config-group">
+                        <label class="config-label">Temperature (0.0 - 1.0)</label>
+                        <input type="number" class="config-input" id="temperature" value="0.3" min="0" max="1" step="0.1">
+                    </div>
+
+                    <div class="config-group">
+                        <label class="config-label">Context Limit</label>
+                        <select class="config-input" id="context-limit">
+                            <option value="1000000">1M tokens (~4 MB)</option>
+                            <option value="2000000">2M tokens (~8 MB)</option>
+                            <option value="3000000">3M tokens (~12 MB)</option>
+                            <option value="4000000">4M tokens (~16 MB)</option>
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label class="config-label">System Prompt</label>
+                        <textarea class="config-input" id="system-prompt" rows="8"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar Config</button>
+                </div>
+
+                <!-- Stats Tab -->
+                <div id="stats-tab" class="tab-content">
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <div class="empty-state-icon">📊</div>
+                            <div>Cargando estadísticas...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-messages" id="chat-messages">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div><strong>¡Bienvenido!</strong></div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        Sube archivos al contexto y comienza a hacer preguntas
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Procesando tu solicitud...</div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="chat-controls">
+                    <label class="switch">
+                        <input type="checkbox" id="use-history" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="switch-label">Usar historial de conversación</span>
+                    <button class="btn btn-secondary btn-small" onclick="clearConversation()" style="margin-left: auto;">
+                        🗑️ Limpiar Chat
+                    </button>
+                </div>
+
+                <div class="chat-input-container">
+                    <textarea 
+                        class="chat-input" 
+                        id="user-input" 
+                        placeholder="Escribe tu pregunta aquí..."
+                        onkeydown="handleKeyDown(event)"></textarea>
+                    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                        📤 Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let isProcessing = false;
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadContext();
+            loadConfig();
+            loadStats();
+            
+            // Setup upload zone
+            const uploadZone = document.getElementById('upload-zone');
+            const fileInput = document.getElementById('file-input');
+            
+            uploadZone.addEventListener('click', () => fileInput.click());
+            
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragging');
+            });
+            
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragging');
+            });
+            
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragging');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+                fileInput.value = '';
+            });
+        });
+
+        // Manejo de archivos
+        async function handleFiles(files) {
+            for (let file of files) {
+                await uploadFile(file);
+            }
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ ${file.name} agregado al contexto`, 'success');
+                    loadContext();
+                    loadStats();
+                } else {
+                    showNotification(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`❌ Error subiendo archivo: ${error}`, 'error');
+            }
+        }
+
+        // Cargar contexto
+        async function loadContext() {
+            try {
+                const response = await fetch('/api/context');
+                const data = await response.json();
+                
+                const container = document.getElementById('context-files');
+                
+                if (data.files.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <div>No hay archivos en el contexto</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = data.files.map(file => `
+                        <div class="context-file">
+                            <div class="file-info">
+                                <div class="file-name">📄 ${file.name}</div>
+                                <div class="file-meta">
+                                    ${file.size} • ${file.tokens.toLocaleString()} tokens • ${file.added}
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-danger btn-small" onclick="removeContext(${file.index})">
+                                    ❌
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Update header stats
+                document.getElementById('total-files').textContent = data.total_files;
+                document.getElementById('total-tokens').textContent = `${Math.round(data.total_tokens / 1000)}K`;
+                
+            } catch (error) {
+                console.error('Error loading context:', error);
+            }
+        }
+
+        async function removeContext(index) {
+            if (!confirm('¿Eliminar este archivo del contexto?')) return;
+            
+            try {
+                const response = await fetch(`/api/context/${index}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ ${data.removed} eliminado`, 'success');
+                    loadContext();
+                    loadStats();
+                }
+            } catch (error) {
+                showNotification(`❌ Error: ${error}`, 'error');
+            }
+        }
+
+        async function clearContext() {
+            if (!confirm('¿Eliminar TODOS los archivos del contexto?')) return;
+            
+            try {
+                const response = await fetch('/api/context/clear', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    showNotification('✅ Contexto limpiado', 'success');
+                    loadContext();
+                    loadStats();
+                }
+            } catch (error) {
+                showNotification(`❌ Error: ${error}`, 'error');
+            }
+        }
+
+        // Cargar configuración
+        async function loadConfig() {
+            try {
+                const configResponse = await fetch('/api/config');
+                const config = await configResponse.json();
+                
+                document.getElementById('max-tokens').value = config.max_tokens;
+                document.getElementById('temperature').value = config.temperature;
+                document.getElementById('context-limit').value = config.context_limit;
+                
+                const promptResponse = await fetch('/api/system-prompt');
+                const promptData = await promptResponse.json();
+                document.getElementById('system-prompt').value = promptData.prompt;
+                
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        async function saveConfig() {
+            try {
+                // Save config
+                await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        max_tokens: parseInt(document.getElementById('max-tokens').value),
+                        temperature: parseFloat(document.getElementById('temperature').value),
+                        context_limit: parseInt(document.getElementById('context-limit').value)
+                    })
+                });
+                
+                // Save system prompt
+                await fetch('/api/system-prompt', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        prompt: document.getElementById('system-prompt').value
+                    })
+                });
+                
+                showNotification('✅ Configuración guardada', 'success');
+                loadStats();
+                
+            } catch (error) {
+                showNotification(`❌ Error: ${error}`, 'error');
+            }
+        }
+
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                const container = document.getElementById('stats-grid');
+                
+                const percentage = stats.percentage_used.toFixed(1);
+                let warningHtml = '';
+                
+                if (percentage > 90) {
+                    warningHtml = '<div class="warning">⚠️ Acercándose al límite de tokens!</div>';
+                } else if (percentage > 70) {
+                    warningHtml = '<div class="warning" style="background: #fef3cd; color: #856404;">⚠️ Sobre el 70% del límite</div>';
+                }
+                
+                container.innerHTML = `
+                    <div class="stats-card">
+                        <div class="stats-card-value">${stats.context_files}</div>
+                        <div class="stats-card-label">Archivos en Contexto</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${Math.round(stats.context_tokens / 1000)}K</div>
+                        <div class="stats-card-label">Tokens de Contexto</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${stats.conversation_turns}</div>
+                        <div class="stats-card-label">Turnos de Conversación</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${Math.round(stats.conversation_tokens / 1000)}K</div>
+                        <div class="stats-card-label">Tokens de Conversación</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${stats.queries_made}</div>
+                        <div class="stats-card-label">Consultas Realizadas</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-card-value">${Math.round(stats.total_tokens / 1000)}K</div>
+                        <div class="stats-card-label">Total Tokens Activos</div>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <div style="font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #333;">
+                            Uso del Contexto: ${percentage}%
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        ${warningHtml}
+                    </div>
+                `;
+                
+                // Update header
+                const convResponse = await fetch('/api/conversation');
+                const convData = await convResponse.json();
+                document.getElementById('total-turns').textContent = convData.turns;
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Chat
+        async function sendMessage() {
+            if (isProcessing) return;
+            
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const useHistory = document.getElementById('use-history').checked;
+            
+            // Add user message to chat
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show loading
+            isProcessing = true;
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('send-btn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        message: message,
+                        use_conversation_history: useHistory
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage('assistant', data.response, {
+                        tokens: data.usage.completion_tokens,
+                        duration: data.duration
+                    });
+                    loadStats();
+                } else {
+                    addMessage('assistant', `❌ Error: ${data.error}`);
+                }
+                
+            } catch (error) {
+                addMessage('assistant', `❌ Error de conexión: ${error}`);
+            } finally {
+                isProcessing = false;
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('send-btn').disabled = false;
+            }
+        }
+
+        function addMessage(role, content, meta = null) {
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            // Remove empty state
+            const emptyState = messagesContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = role === 'user' ? 'U' : 'AI';
+            const avatarBg = role === 'user' ? '#667eea' : '#764ba2';
+            
+            let metaHtml = '';
+            if (meta) {
+                metaHtml = `<div class="message-meta">
+                    ${meta.tokens} tokens • ${meta.duration.toFixed(2)}s
+                </div>`;
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar" style="background: ${avatarBg}">${avatar}</div>
+                <div style="flex: 1;">
+                    <div class="message-content">${formatMessage(content)}</div>
+                    ${metaHtml}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessage(text) {
+            // Simple markdown-like formatting
+            text = text.replace(/\n/g, '<br>');
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/\[Source (\d+): (.*?)\]/g, '<span style="background: #ffd93d; padding: 2px 6px; border-radius: 4px; font-size: 11px;">[Source $1: $2]</span>');
+            return text;
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function clearConversation() {
+            if (!confirm('¿Limpiar el historial de conversación?')) return;
+            
+            try {
+                const response = await fetch('/api/conversation/clear', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    document.getElementById('chat-messages').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <div>Conversación limpiada</div>
+                        </div>
+                    `;
+                    showNotification('✅ Conversación limpiada', 'success');
+                    loadStats();
+                }
+            } catch (error) {
+                showNotification(`❌ Error: ${error}`, 'error');
+            }
+        }
+
+        // Tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Reload data if needed
+            if (tabName === 'stats') {
+                loadStats();
+            }
+        }
+
+        // Notifications
+        function showNotification(message, type) {
+            // Simple alert for now - you can enhance this
+            console.log(`[${type}] ${message}`);
+        }
+    </script>
+</body>
+</html>

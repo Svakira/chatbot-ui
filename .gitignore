@@ -29,6 +29,7 @@ instance/
 
 # Uploads
 uploads/
+sessions/
 *.epub
 *.txt
 *.md

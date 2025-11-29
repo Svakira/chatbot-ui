@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -43,7 +43,7 @@
         }
 
         .header h1 {
-            color: #667eea;
+            color: #357ABD;
             font-size: 24px;
             font-weight: 600;
         }
@@ -63,7 +63,7 @@
 
         .stat-value {
             font-weight: bold;
-            color: #667eea;
+            color: #357ABD;
             font-size: 18px;
         }
 
@@ -83,7 +83,7 @@
         }
 
         .sidebar-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
             color: white;
             padding: 20px;
             font-size: 18px;
@@ -115,7 +115,7 @@
         }
 
         .tab.active {
-            background: #667eea;
+            background: #4A90E2;
             color: white;
         }
 
@@ -128,7 +128,7 @@
         }
 
         .upload-zone {
-            border: 2px dashed #667eea;
+            border: 2px dashed #4A90E2;
             border-radius: 10px;
             padding: 30px;
             text-align: center;
@@ -139,17 +139,17 @@
 
         .upload-zone:hover {
             background: #f8f9ff;
-            border-color: #764ba2;
+            border-color: #357ABD;
         }
 
         .upload-zone.dragging {
             background: #e8ebff;
-            border-color: #667eea;
+            border-color: #4A90E2;
         }
 
         .upload-icon {
             font-size: 48px;
-            color: #667eea;
+            color: #4A90E2;
             margin-bottom: 10px;
         }
 
@@ -204,7 +204,7 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #4A90E2;
             color: white;
         }
 
@@ -283,11 +283,11 @@
         }
 
         .message.user .message-avatar {
-            background: #667eea;
+            background: #4A90E2;
         }
 
         .message.assistant .message-avatar {
-            background: #764ba2;
+            background: #357ABD;
         }
 
         .message-content {
@@ -298,7 +298,7 @@
         }
 
         .message.user .message-content {
-            background: #667eea;
+            background: #4A90E2;
             color: white;
         }
 
@@ -363,7 +363,7 @@
         }
 
         input:checked + .slider {
-            background-color: #667eea;
+            background-color: #4A90E2;
         }
 
         input:checked + .slider:before {
@@ -395,12 +395,12 @@
 
         .chat-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #4A90E2;
         }
 
         .send-btn {
             padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -425,7 +425,7 @@
             display: none;
             text-align: center;
             padding: 20px;
-            color: #667eea;
+            color: #4A90E2;
         }
 
         .loading.active {
@@ -434,7 +434,7 @@
 
         .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #4A90E2;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -469,7 +469,7 @@
 
         .config-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #4A90E2;
         }
 
         .stats-grid {
@@ -487,7 +487,7 @@
         .stats-card-value {
             font-size: 24px;
             font-weight: bold;
-            color: #667eea;
+            color: #4A90E2;
             margin-bottom: 5px;
         }
 
@@ -527,7 +527,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
             transition: width 0.3s;
         }
 
@@ -554,7 +554,7 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: #4A90E2;
             border-radius: 10px;
         }
 
@@ -571,7 +571,7 @@
             <div class="header-stats">
                 <div class="stat">
                     <span class="stat-value" id="total-files">0</span>
-                    <span class="stat-label">Archivos</span>
+                    <span class="stat-label">Files</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="total-tokens">0K</span>
@@ -579,19 +579,19 @@
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="total-turns">0</span>
-                    <span class="stat-label">Conversaciones</span>
+                    <span class="stat-label">Conversations</span>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="sidebar-header">Panel de Control</div>
+            <div class="sidebar-header">Control Panel</div>
             <div class="sidebar-content">
                 <!-- Tabs -->
                 <div class="tabs">
-                    <button class="tab active" onclick="switchTab('context')">📁 Contexto</button>
-                    <button class="tab" onclick="switchTab('config')">⚙️ Config</button>
+                    <button class="tab active" onclick="switchTab('context')">📁 Context</button>
+                    <button class="tab" onclick="switchTab('config')">Config</button>
                     <button class="tab" onclick="switchTab('stats')">📊 Stats</button>
                 </div>
 
@@ -599,7 +599,7 @@
                 <div id="context-tab" class="tab-content active">
                     <div class="upload-zone" id="upload-zone">
                         <div class="upload-icon">📤</div>
-                        <div><strong>Click o arrastra archivos</strong></div>
+                        <div><strong>Click or drag files here</strong></div>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">
                             .txt, .epub, .md, .json, .csv, .log
                         </div>
@@ -609,14 +609,14 @@
 
                     <div id="context-files" class="context-files">
                         <div class="empty-state">
-                            <div class="empty-state-icon">📂</div>
-                            <div>No hay archivos en el contexto</div>
+                            <div class="empty-state-icon"></div>
+                            <div>No files in context</div>
                         </div>
                     </div>
 
                     <div class="action-buttons">
                         <button class="btn btn-danger btn-small" onclick="clearContext()">
-                            🗑️ Limpiar Todo
+                            Clear All
                         </button>
                     </div>
                 </div>
@@ -648,7 +648,7 @@
                         <textarea class="config-input" id="system-prompt" rows="8"></textarea>
                     </div>
 
-                    <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar Config</button>
+                    <button class="btn btn-primary" onclick="saveConfig()">💾 Save Config</button>
                 </div>
 
                 <!-- Stats Tab -->
@@ -656,7 +656,7 @@
                     <div class="stats-grid" id="stats-grid">
                         <div class="empty-state" style="grid-column: 1 / -1;">
                             <div class="empty-state-icon">📊</div>
-                            <div>Cargando estadísticas...</div>
+                            <div>Loading statistics...</div>
                         </div>
                     </div>
                 </div>
@@ -667,17 +667,17 @@
         <div class="chat-area">
             <div class="chat-messages" id="chat-messages">
                 <div class="empty-state">
-                    <div class="empty-state-icon">💬</div>
-                    <div><strong>¡Bienvenido!</strong></div>
+                    <div class="empty-state-icon"></div>
+                    <div><strong>Welcome!</strong></div>
                     <div style="margin-top: 10px; font-size: 14px;">
-                        Sube archivos al contexto y comienza a hacer preguntas
+                        Upload files to context and start asking questions
                     </div>
                 </div>
             </div>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <div>Procesando tu solicitud...</div>
+                <div>Processing your request...</div>
             </div>
 
             <div class="chat-input-area">
@@ -686,9 +686,9 @@
                         <input type="checkbox" id="use-history" checked>
                         <span class="slider"></span>
                     </label>
-                    <span class="switch-label">Usar historial de conversación</span>
+                    <span class="switch-label">Use conversation history</span>
                     <button class="btn btn-secondary btn-small" onclick="clearConversation()" style="margin-left: auto;">
-                        🗑️ Limpiar Chat
+                        Clear Chat
                     </button>
                 </div>
 
@@ -696,10 +696,10 @@
                     <textarea 
                         class="chat-input" 
                         id="user-input" 
-                        placeholder="Escribe tu pregunta aquí..."
+                        placeholder="Write your question here..."
                         onkeydown="handleKeyDown(event)"></textarea>
                     <button class="send-btn" id="send-btn" onclick="sendMessage()">
-                        📤 Enviar
+                        Send
                     </button>
                 </div>
             </div>
@@ -743,7 +743,7 @@
             });
         });
 
-        // Manejo de archivos
+        // File handling
         async function handleFiles(files) {
             for (let file of files) {
                 await uploadFile(file);
@@ -763,18 +763,36 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification(`✅ ${file.name} agregado al contexto`, 'success');
+                    // Show storage location notification
+                    if (data.file.stored_on_server) {
+                        showNotification(
+                            `${file.name} added to context (stored on server temporarily due to size > 100KB). This file will be automatically deleted when you clear context or close your session.`,
+                            'info',
+                            8000
+                        );
+                    } else {
+                        // Store content in browser sessionStorage for small files
+                        const contextFiles = JSON.parse(sessionStorage.getItem('contextFiles') || '[]');
+                        contextFiles.push({
+                            name: data.file.name,
+                            content: data.file.content,
+                            tokens: data.file.tokens,
+                            size: data.file.size
+                        });
+                        sessionStorage.setItem('contextFiles', JSON.stringify(contextFiles));
+                        showNotification(`${file.name} added to context (stored in browser)`, 'success');
+                    }
                     loadContext();
                     loadStats();
                 } else {
-                    showNotification(`❌ Error: ${data.error}`, 'error');
+                    showNotification(`Error: ${data.error}`, 'error');
                 }
             } catch (error) {
-                showNotification(`❌ Error subiendo archivo: ${error}`, 'error');
+                showNotification(`Error uploading file: ${error}`, 'error');
             }
         }
 
-        // Cargar contexto
+        // Load context
         async function loadContext() {
             try {
                 const response = await fetch('/api/context');
@@ -785,26 +803,30 @@
                 if (data.files.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">📂</div>
-                            <div>No hay archivos en el contexto</div>
+                            <div class="empty-state-icon"></div>
+                            <div>No files in context</div>
                         </div>
                     `;
                 } else {
-                    container.innerHTML = data.files.map(file => `
+                    container.innerHTML = data.files.map(file => {
+                        const storageIcon = file.stored_on_server 
+                            ? '<span style="color: #E67E22; font-size: 11px;" title="Stored on server temporarily">SERVER</span>' 
+                            : '<span style="color: #27AE60; font-size: 11px;" title="Stored in browser">BROWSER</span>';
+                        return `
                         <div class="context-file">
                             <div class="file-info">
-                                <div class="file-name">📄 ${file.name}</div>
+                                <div class="file-name">${file.name} ${storageIcon}</div>
                                 <div class="file-meta">
                                     ${file.size} • ${file.tokens.toLocaleString()} tokens • ${file.added}
                                 </div>
                             </div>
                             <div class="file-actions">
                                 <button class="btn btn-danger btn-small" onclick="removeContext(${file.index})">
-                                    ❌
+                                    Delete
                                 </button>
                             </div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 }
                 
                 // Update header stats
@@ -817,7 +839,7 @@
         }
 
         async function removeContext(index) {
-            if (!confirm('¿Eliminar este archivo del contexto?')) return;
+            if (!confirm('Delete this file from context?')) return;
             
             try {
                 const response = await fetch(`/api/context/${index}`, {
@@ -827,17 +849,17 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification(`✅ ${data.removed} eliminado`, 'success');
+                    showNotification(`${data.removed} deleted`, 'success');
                     loadContext();
                     loadStats();
                 }
             } catch (error) {
-                showNotification(`❌ Error: ${error}`, 'error');
+                showNotification(`Error: ${error}`, 'error');
             }
         }
 
         async function clearContext() {
-            if (!confirm('¿Eliminar TODOS los archivos del contexto?')) return;
+            if (!confirm('Delete ALL files from context?')) return;
             
             try {
                 const response = await fetch('/api/context/clear', {
@@ -845,16 +867,16 @@
                 });
                 
                 if (response.ok) {
-                    showNotification('✅ Contexto limpiado', 'success');
+                    showNotification('Context cleared', 'success');
                     loadContext();
                     loadStats();
                 }
             } catch (error) {
-                showNotification(`❌ Error: ${error}`, 'error');
+                showNotification(`Error: ${error}`, 'error');
             }
         }
 
-        // Cargar configuración
+        // Load configuration
         async function loadConfig() {
             try {
                 const configResponse = await fetch('/api/config');
@@ -895,15 +917,15 @@
                     })
                 });
                 
-                showNotification('✅ Configuración guardada', 'success');
+                showNotification('Configuration saved', 'success');
                 loadStats();
                 
             } catch (error) {
-                showNotification(`❌ Error: ${error}`, 'error');
+                showNotification(`Error: ${error}`, 'error');
             }
         }
 
-        // Cargar estadísticas
+        // Load statistics
         async function loadStats() {
             try {
                 const response = await fetch('/api/stats');
@@ -915,39 +937,39 @@
                 let warningHtml = '';
                 
                 if (percentage > 90) {
-                    warningHtml = '<div class="warning">⚠️ Acercándose al límite de tokens!</div>';
+                    warningHtml = '<div class="warning">Warning: Approaching token limit!</div>';
                 } else if (percentage > 70) {
-                    warningHtml = '<div class="warning" style="background: #fef3cd; color: #856404;">⚠️ Sobre el 70% del límite</div>';
+                    warningHtml = '<div class="warning" style="background: #fef3cd; color: #856404;">Notice: Over 70% of limit</div>';
                 }
                 
                 container.innerHTML = `
                     <div class="stats-card">
                         <div class="stats-card-value">${stats.context_files}</div>
-                        <div class="stats-card-label">Archivos en Contexto</div>
+                        <div class="stats-card-label">Context Files</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${Math.round(stats.context_tokens / 1000)}K</div>
-                        <div class="stats-card-label">Tokens de Contexto</div>
+                        <div class="stats-card-label">Context Tokens</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${stats.conversation_turns}</div>
-                        <div class="stats-card-label">Turnos de Conversación</div>
+                        <div class="stats-card-label">Conversation Turns</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${Math.round(stats.conversation_tokens / 1000)}K</div>
-                        <div class="stats-card-label">Tokens de Conversación</div>
+                        <div class="stats-card-label">Conversation Tokens</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${stats.queries_made}</div>
-                        <div class="stats-card-label">Consultas Realizadas</div>
+                        <div class="stats-card-label">Queries Made</div>
                     </div>
                     <div class="stats-card">
                         <div class="stats-card-value">${Math.round(stats.total_tokens / 1000)}K</div>
-                        <div class="stats-card-label">Total Tokens Activos</div>
+                        <div class="stats-card-label">Total Active Tokens</div>
                     </div>
                     <div style="grid-column: 1 / -1;">
                         <div style="font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #333;">
-                            Uso del Contexto: ${percentage}%
+                            Context Usage: ${percentage}%
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${percentage}%"></div>
@@ -1005,11 +1027,11 @@
                     });
                     loadStats();
                 } else {
-                    addMessage('assistant', `❌ Error: ${data.error}`);
+                    addMessage('assistant', `Error: ${data.error}`);
                 }
                 
             } catch (error) {
-                addMessage('assistant', `❌ Error de conexión: ${error}`);
+                addMessage('assistant', `Error de conexión: ${error}`);
             } finally {
                 isProcessing = false;
                 document.getElementById('loading').classList.remove('active');
@@ -1030,7 +1052,7 @@
             messageDiv.className = `message ${role}`;
             
             const avatar = role === 'user' ? 'U' : 'AI';
-            const avatarBg = role === 'user' ? '#667eea' : '#764ba2';
+            const avatarBg = role === 'user' ? '#4A90E2' : '#357ABD';
             
             let metaHtml = '';
             if (meta) {
@@ -1068,7 +1090,7 @@
         }
 
         async function clearConversation() {
-            if (!confirm('¿Limpiar el historial de conversación?')) return;
+            if (!confirm('Clear conversation history?')) return;
             
             try {
                 const response = await fetch('/api/conversation/clear', {
@@ -1078,15 +1100,15 @@
                 if (response.ok) {
                     document.getElementById('chat-messages').innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">💬</div>
-                            <div>Conversación limpiada</div>
+                            <div class="empty-state-icon"></div>
+                            <div>Conversation cleared</div>
                         </div>
                     `;
-                    showNotification('✅ Conversación limpiada', 'success');
+                    showNotification('Conversation cleared', 'success');
                     loadStats();
                 }
             } catch (error) {
-                showNotification(`❌ Error: ${error}`, 'error');
+                showNotification(`Error: ${error}`, 'error');
             }
         }
 
@@ -1111,10 +1133,53 @@
         }
 
         // Notifications
-        function showNotification(message, type) {
-            // Simple alert for now - you can enhance this
-            console.log(`[${type}] ${message}`);
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            const colors = {
+                success: '#27AE60',
+                error: '#E74C3C',
+                info: '#3498DB',
+                warning: '#F39C12'
+            };
+            
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
         }
+        
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

@@ -8,6 +8,7 @@ from ebooklib import epub
 from bs4 import BeautifulSoup
 import re
 import secrets
+import pickle
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
@@ -15,6 +16,13 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(16))
+
+SESSION_FOLDER = 'sessions'
+if not os.path.exists(SESSION_FOLDER):
+    os.makedirs(SESSION_FOLDER)
+
+# Threshold for storing files on server vs browser (100KB)
+STORAGE_THRESHOLD = 100 * 1024  # 100KB in bytes
 
 DEFAULT_CONFIG = {
     'max_tokens': int(os.getenv('MAX_TOKENS', 4000)),
@@ -137,6 +145,40 @@ def build_context_section(context_files):
     
     return '\n\n'.join(context_parts)
 
+def get_session_id():
+    """Get or create session ID"""
+    if 'session_id' not in session:
+        session['session_id'] = secrets.token_hex(16)
+    return session['session_id']
+
+def get_session_file():
+    """Get session file path"""
+    session_id = get_session_id()
+    return os.path.join(SESSION_FOLDER, f'{session_id}.pkl')
+
+def load_session_data():
+    """Load session data from file"""
+    session_file = get_session_file()
+    if os.path.exists(session_file):
+        try:
+            with open(session_file, 'rb') as f:
+                return pickle.load(f)
+        except:
+            pass
+    return {
+        'context_files': [],
+        'conversation_history': [],
+        'config': DEFAULT_CONFIG.copy(),
+        'query_history': [],
+        'system_prompt': DEFAULT_SYSTEM_PROMPT
+    }
+
+def save_session_data(data):
+    """Save session data to file"""
+    session_file = get_session_file()
+    with open(session_file, 'wb') as f:
+        pickle.dump(data, f)
+
 def send_prompt_to_model(user_message, system_prompt, permanent_context, conversation_history, config):
     messages = [{'role': 'system', 'content': system_prompt}]
     
@@ -178,16 +220,8 @@ def send_prompt_to_model(user_message, system_prompt, permanent_context, convers
         raise Exception(f"Request failed: {str(e)}")
 
 def init_session():
-    if 'context_files' not in session:
-        session['context_files'] = []
-    if 'conversation_history' not in session:
-        session['conversation_history'] = []
-    if 'config' not in session:
-        session['config'] = DEFAULT_CONFIG.copy()
-    if 'query_history' not in session:
-        session['query_history'] = []
-    if 'system_prompt' not in session:
-        session['system_prompt'] = DEFAULT_SYSTEM_PROMPT
+    """Initialize session - now just ensures session_id exists"""
+    get_session_id()
 
 @app.route('/')
 def index():
@@ -220,19 +254,28 @@ def upload_file():
             os.remove(filepath)
             return jsonify({'success': False, 'error': 'File appears to be empty'}), 400
         
+        content_size = len(content.encode('utf-8'))
+        use_server_storage = content_size > STORAGE_THRESHOLD
+        
         _, ext = os.path.splitext(filename.lower())
         file_info = {
             'name': filename,
-            'content': content,
+            'content': content if not use_server_storage else None,
             'type': ext[1:] if ext else 'txt',
             'added': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'size': len(content),
-            'tokens': count_tokens_estimate(content)
+            'size': content_size,
+            'tokens': count_tokens_estimate(content),
+            'stored_on_server': use_server_storage,
+            'server_path': filepath if use_server_storage else None
         }
         
-        context_files = session.get('context_files', [])
-        context_files.append(file_info)
-        session['context_files'] = context_files
+        # If using browser storage, delete server file
+        if not use_server_storage:
+            os.remove(filepath)
+        
+        data = load_session_data()
+        data['context_files'].append(file_info)
+        save_session_data(data)
         
         return jsonify({
             'success': True,
@@ -241,7 +284,9 @@ def upload_file():
                 'type': file_info['type'],
                 'size': format_size(file_info['size']),
                 'tokens': file_info['tokens'],
-                'added': file_info['added']
+                'added': file_info['added'],
+                'stored_on_server': use_server_storage,
+                'content': content if not use_server_storage else None
             }
         })
         
@@ -254,21 +299,34 @@ def upload_file():
 def chat():
     init_session()
     
-    data = request.json
-    user_message = data.get('message', '').strip()
-    use_conversation_history = data.get('use_conversation_history', True)
+    request_data = request.json
+    user_message = request_data.get('message', '').strip()
+    use_conversation_history = request_data.get('use_conversation_history', True)
     
     if not user_message:
         return jsonify({'success': False, 'error': 'Message is empty'}), 400
     
     try:
-        config = session.get('config', DEFAULT_CONFIG)
-        system_prompt = session.get('system_prompt', DEFAULT_SYSTEM_PROMPT)
-        context_files = session.get('context_files', [])
+        data = load_session_data()
+        config = data.get('config', DEFAULT_CONFIG)
+        system_prompt = data.get('system_prompt', DEFAULT_SYSTEM_PROMPT)
+        context_files = data.get('context_files', [])
         
-        permanent_context = build_context_section(context_files)
+        # Load content from server if needed
+        context_files_with_content = []
+        for f in context_files:
+            if f.get('stored_on_server') and f.get('server_path'):
+                # Load from server file
+                content = read_file_content(f['server_path'])
+                file_copy = f.copy()
+                file_copy['content'] = content
+                context_files_with_content.append(file_copy)
+            else:
+                context_files_with_content.append(f)
         
-        conversation_history = session.get('conversation_history', []) if use_conversation_history else []
+        permanent_context = build_context_section(context_files_with_content)
+        
+        conversation_history = data.get('conversation_history', []) if use_conversation_history else []
         
         result = send_prompt_to_model(
             user_message,
@@ -282,9 +340,9 @@ def chat():
         
         conversation_history.append({'role': 'user', 'content': user_message})
         conversation_history.append({'role': 'assistant', 'content': assistant_response})
-        session['conversation_history'] = conversation_history
+        data['conversation_history'] = conversation_history
         
-        query_history = session.get('query_history', [])
+        query_history = data.get('query_history', [])
         query_history.append({
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'prompt': user_message,
@@ -292,7 +350,9 @@ def chat():
             'completion_tokens': result['usage']['completion_tokens'],
             'duration': result.get('duration', 0)
         })
-        session['query_history'] = query_history
+        data['query_history'] = query_history
+        
+        save_session_data(data)
         
         return jsonify({
             'success': True,
@@ -308,7 +368,8 @@ def chat():
 @app.route('/api/context', methods=['GET'])
 def get_context():
     init_session()
-    context_files = session.get('context_files', [])
+    data = load_session_data()
+    context_files = data.get('context_files', [])
     
     files = []
     for i, f in enumerate(context_files):
@@ -318,7 +379,8 @@ def get_context():
             'type': f['type'],
             'size': format_size(f['size']),
             'tokens': f['tokens'],
-            'added': f['added']
+            'added': f['added'],
+            'stored_on_server': f.get('stored_on_server', False)
         })
     
     total_tokens = sum(f['tokens'] for f in context_files)
@@ -334,11 +396,22 @@ def get_context():
 @app.route('/api/context/<int:index>', methods=['DELETE'])
 def remove_context(index):
     init_session()
-    context_files = session.get('context_files', [])
+    data = load_session_data()
+    context_files = data.get('context_files', [])
     
     if 0 <= index < len(context_files):
         removed = context_files.pop(index)
-        session['context_files'] = context_files
+        
+        # Delete server file if it was stored there
+        if removed.get('stored_on_server') and removed.get('server_path'):
+            try:
+                if os.path.exists(removed['server_path']):
+                    os.remove(removed['server_path'])
+            except Exception as e:
+                print(f"Warning: Could not delete server file: {e}")
+        
+        data['context_files'] = context_files
+        save_session_data(data)
         return jsonify({'success': True, 'removed': removed['name']})
     
     return jsonify({'success': False, 'error': 'Invalid index'}), 400
@@ -346,13 +419,27 @@ def remove_context(index):
 @app.route('/api/context/clear', methods=['POST'])
 def clear_context():
     init_session()
-    session['context_files'] = []
+    data = load_session_data()
+    context_files = data.get('context_files', [])
+    
+    # Delete all server-stored files
+    for f in context_files:
+        if f.get('stored_on_server') and f.get('server_path'):
+            try:
+                if os.path.exists(f['server_path']):
+                    os.remove(f['server_path'])
+            except Exception as e:
+                print(f"Warning: Could not delete server file: {e}")
+    
+    data['context_files'] = []
+    save_session_data(data)
     return jsonify({'success': True})
 
 @app.route('/api/conversation', methods=['GET'])
 def get_conversation():
     init_session()
-    conversation_history = session.get('conversation_history', [])
+    data = load_session_data()
+    conversation_history = data.get('conversation_history', [])
     
     messages = []
     for i, msg in enumerate(conversation_history):
@@ -372,19 +459,30 @@ def get_conversation():
 @app.route('/api/conversation/clear', methods=['POST'])
 def clear_conversation():
     init_session()
-    session['conversation_history'] = []
+    data = load_session_data()
+    data['conversation_history'] = []
+    save_session_data(data)
     return jsonify({'success': True})
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     init_session()
+    data = load_session_data()
     
-    context_files = session.get('context_files', [])
-    conversation_history = session.get('conversation_history', [])
-    query_history = session.get('query_history', [])
-    config = session.get('config', DEFAULT_CONFIG)
+    context_files = data.get('context_files', [])
+    conversation_history = data.get('conversation_history', [])
+    query_history = data.get('query_history', [])
+    config = data.get('config', DEFAULT_CONFIG)
     
-    context_tokens = sum(count_tokens_estimate(f['content']) for f in context_files)
+    # Calculate context tokens (handling server-stored files)
+    context_tokens = 0
+    for f in context_files:
+        if f.get('stored_on_server'):
+            context_tokens += f.get('tokens', 0)
+        else:
+            context_tokens += count_tokens_estimate(f.get('content', ''))
+    
+    # Calculate conversation tokens
     conv_tokens = sum(count_tokens_estimate(m['content']) for m in conversation_history)
     
     stats = {
@@ -410,37 +508,41 @@ def get_stats():
 @app.route('/api/config', methods=['GET', 'POST'])
 def get_or_update_config():
     init_session()
+    data = load_session_data()
     
     if request.method == 'GET':
-        return jsonify(session.get('config', DEFAULT_CONFIG))
+        return jsonify(data.get('config', DEFAULT_CONFIG))
     
-    data = request.json
-    config = session.get('config', DEFAULT_CONFIG.copy())
+    request_data = request.json
+    config = data.get('config', DEFAULT_CONFIG.copy())
     
-    if 'max_tokens' in data:
-        config['max_tokens'] = int(data['max_tokens'])
-    if 'temperature' in data:
-        config['temperature'] = float(data['temperature'])
-    if 'context_limit' in data:
-        config['context_limit'] = int(data['context_limit'])
+    if 'max_tokens' in request_data:
+        config['max_tokens'] = int(request_data['max_tokens'])
+    if 'temperature' in request_data:
+        config['temperature'] = float(request_data['temperature'])
+    if 'context_limit' in request_data:
+        config['context_limit'] = int(request_data['context_limit'])
     
-    session['config'] = config
+    data['config'] = config
+    save_session_data(data)
     return jsonify({'success': True, 'config': config})
 
 @app.route('/api/system-prompt', methods=['GET', 'POST'])
 def get_or_update_system_prompt():
     init_session()
+    data = load_session_data()
     
     if request.method == 'GET':
-        return jsonify({'prompt': session.get('system_prompt', DEFAULT_SYSTEM_PROMPT)})
+        return jsonify({'prompt': data.get('system_prompt', DEFAULT_SYSTEM_PROMPT)})
     
-    data = request.json
-    prompt = data.get('prompt', '').strip()
+    request_data = request.json
+    prompt = request_data.get('prompt', '').strip()
     
     if not prompt:
         return jsonify({'success': False, 'error': 'Prompt is empty'}), 400
     
-    session['system_prompt'] = prompt
+    data['system_prompt'] = prompt
+    save_session_data(data)
     return jsonify({'success': True})
 
 @app.errorhandler(413)
